@@ -10,7 +10,7 @@ class Tensor:
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
     
-    def __add__(self,other):
+    def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
 
         try:
@@ -23,9 +23,7 @@ class Tensor:
             other.grad += out.grad
         out._backward = _backward
 
-        return out       
+        return out
     
-a= Tensor([1, 2, 3])
-b = Tensor([4, 5, 6])
-c = a + b
-print(c)  
+    def __radd__(self, other):
+        return self+other
