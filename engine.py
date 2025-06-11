@@ -1,11 +1,12 @@
 import numpy as np
 
 class Tensor:
-    def __init__(self, data, children=()):
+    def __init__(self, data, children=(), _op=''):
         self.data = np.array(data)
         self.grad = np.zeros_like(self.data)
         self._backward = lambda: None
         self.children = set(children)
+        self._op = _op
 
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
@@ -14,7 +15,7 @@ class Tensor:
         other = other if isinstance(other, Tensor) else Tensor(other)
 
         try:
-            out = Tensor(self.data + other.data, children=(self, other))
+            out = Tensor(self.data + other.data, children=(self, other), _op='+')
         except ValueError as e:
             raise ValueError(f"Tensor shapes {self.data.shape} and {other.data.shape} are not compatible for addition.") from e
 
@@ -44,7 +45,7 @@ class Tensor:
         other = other if isinstance(other, Tensor) else Tensor(other)
 
         try:
-            out = Tensor(self.data * other.data, children=(self, other))
+            out = Tensor(self.data * other.data, children=(self, other), _op='*')
         except ValueError as e:
             raise ValueError(f"Tensor shapes {self.data.shape} and {other.data.shape} are not compatible for addition.") from e
 
