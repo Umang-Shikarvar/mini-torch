@@ -1,5 +1,13 @@
 import numpy as np
 
+def _handle_broadcasting(grad, target_shape):
+    while grad.ndim > len(target_shape):
+        grad = grad.sum(axis=0)
+    for axis, size in enumerate(target_shape):
+        if size == 1:
+            grad = grad.sum(axis=axis, keepdims=True)
+    return grad
+
 class Tensor:
     def __init__(self, data, children=(), _op='', requires_grad=True):
         self.data = np.array(data, dtype=float)
@@ -17,7 +25,6 @@ class Tensor:
         return self.data.shape
 
     
-
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
 
@@ -30,19 +37,11 @@ class Tensor:
         def _backward():
             if self.requires_grad:
                 grad_self = out.grad
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
                 self.grad += grad_self
             if other.requires_grad:
                 grad_other = out.grad
-                while grad_other.ndim > other.data.ndim:
-                    grad_other = grad_other.sum(axis=0)
-                for axis, size in enumerate(other.data.shape):
-                    if size == 1:
-                        grad_other = grad_other.sum(axis=axis, keepdims=True)
+                grad_other = _handle_broadcasting(grad_other, other.data.shape)
                 other.grad += grad_other
         out._backward = _backward
 
@@ -61,19 +60,11 @@ class Tensor:
         def _backward():
             if self.requires_grad:
                 grad_self = out.grad * other.data
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
                 self.grad += grad_self
             if other.requires_grad:
                 grad_other = out.grad * self.data
-                while grad_other.ndim > other.data.ndim:
-                    grad_other = grad_other.sum(axis=0)
-                for axis, size in enumerate(other.data.shape):
-                    if size == 1:
-                        grad_other = grad_other.sum(axis=axis, keepdims=True)
+                grad_other = _handle_broadcasting(grad_other, other.data.shape)
                 other.grad += grad_other
         out._backward = _backward
 
@@ -89,53 +80,12 @@ class Tensor:
         def _backward():
             if self.requires_grad:
                 grad_self = out.grad * power * (self.data ** (power - 1))
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
                 self.grad += grad_self
         out._backward = _backward
 
         return out
 
-
-    def exp(self):
-        out = Tensor(np.exp(self.data), children=(self,), _op='exp', requires_grad=self.requires_grad)
-
-        def _backward():
-            if self.requires_grad:
-                grad_self = out.grad * np.exp(self.data)
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
-                self.grad += grad_self
-        out._backward = _backward
-
-        return out
-    
-
-    def log(self):
-        if np.any(self.data <= 0):
-            raise ValueError("Logarithm undefined for non-positive values.")
-        
-        out = Tensor(np.log(self.data), children=(self,), _op='log', requires_grad=self.requires_grad)
-
-        def _backward():
-            if self.requires_grad:
-                grad_self = out.grad / self.data
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
-                self.grad += grad_self
-        out._backward = _backward
-
-        return out
-    
     
     def __neg__(self):      # -self
         return self * -1
@@ -173,21 +123,12 @@ class Tensor:
         def _backward():
             if self.requires_grad:
                 grad_self = np.matmul(out.grad, np.swapaxes(other.data, -1, -2))
-                # Handle broadcasting during backprop
-                while grad_self.ndim > self.data.ndim:
-                    grad_self = grad_self.sum(axis=0)
-                for axis, size in enumerate(self.data.shape):
-                    if size == 1:
-                        grad_self = grad_self.sum(axis=axis, keepdims=True)
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
                 self.grad += grad_self
 
             if other.requires_grad:
                 grad_other = np.matmul(np.swapaxes(self.data, -1, -2), out.grad)
-                while grad_other.ndim > other.data.ndim:
-                    grad_other = grad_other.sum(axis=0)
-                for axis, size in enumerate(other.data.shape):
-                    if size == 1:
-                        grad_other = grad_other.sum(axis=axis, keepdims=True)
+                grad_other = _handle_broadcasting(grad_other, other.data.shape)
                 other.grad += grad_other
 
         out._backward = _backward
@@ -229,3 +170,44 @@ class Tensor:
         topo_sort(self)
         for tensor in topo:
             tensor.grad = np.zeros_like(tensor.data)
+
+
+
+def pow(tensor, power):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    return tensor ** power
+Tensor.pow = staticmethod(pow)
+
+
+def exp(tensor):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    out = Tensor(np.exp(tensor.data), children=(tensor,), _op='exp', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad * np.exp(tensor.data)
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
+Tensor.exp = exp
+
+
+def log(tensor):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    if np.any(tensor.data < 0):
+        print("Warning: log of negative number will result in NaN.")
+
+    out = Tensor(np.log(tensor.data), children=(tensor,), _op='log', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad / tensor.data
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
+Tensor.log = log
+

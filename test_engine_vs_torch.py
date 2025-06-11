@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import pytest
-from minitorch.engine import Tensor
+from minitorch import Tensor, exp, log
 
 def assert_tensor_allclose(t1, t2, atol=1e-6):
     assert np.allclose(np.array(t1.data), np.array(t2.detach().cpu().numpy()), atol=atol)
@@ -148,6 +148,26 @@ def test_rtruediv():
     c = 6.0 / a
     t_a = torch.tensor(2.0, requires_grad=True)
     t_c = 6.0 / t_a
+    assert_tensor_allclose(c, t_c)
+    c.backward()
+    t_c.backward()
+    assert_tensor_allclose(a, t_a)
+
+def test_exp_function():
+    a = Tensor(1.5)
+    c = exp(a)
+    t_a = torch.tensor(1.5, requires_grad=True)
+    t_c = t_a.exp()
+    assert_tensor_allclose(c, t_c)
+    c.backward()
+    t_c.backward()
+    assert_tensor_allclose(a, t_a)
+
+def test_log_function():
+    a = Tensor(2.0)
+    c = log(a)
+    t_a = torch.tensor(2.0, requires_grad=True)
+    t_c = t_a.log()
     assert_tensor_allclose(c, t_c)
     c.backward()
     t_c.backward()
