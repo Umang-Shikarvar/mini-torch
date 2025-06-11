@@ -165,9 +165,10 @@ class Tensor:
 
     def __matmul__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
+        
         requires_grad = self.requires_grad or other.requires_grad
         out_data = np.matmul(self.data, other.data)
-        out = Tensor(out_data, children=(self, other), _op='@',requires_grad=requires_grad)
+        out = Tensor(out_data, children=(self, other), _op='@', requires_grad=requires_grad)
 
         def _backward():
             if self.requires_grad:
@@ -188,6 +189,7 @@ class Tensor:
                     if size == 1:
                         grad_other = grad_other.sum(axis=axis, keepdims=True)
                 other.grad += grad_other
+
         out._backward = _backward
         return out
 
