@@ -30,7 +30,7 @@ class Linear(Module):
             params.append(self.bias)
         return params
     
-    def __call__(self, x):
+    def forward(self, x):
         if not isinstance(x, Tensor):
             raise TypeError("Input must be a Tensor.")
         if x.data.shape[1] != self.in_features:
