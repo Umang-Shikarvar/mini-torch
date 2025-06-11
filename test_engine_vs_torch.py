@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import pytest
-from engine import Tensor
+from minitorch.engine import Tensor
 
 def assert_tensor_allclose(t1, t2, atol=1e-6):
     assert np.allclose(np.array(t1.data), np.array(t2.detach().cpu().numpy()), atol=atol)

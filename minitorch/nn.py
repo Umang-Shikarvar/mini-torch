@@ -1,5 +1,5 @@
 import random
-from engine import Tensor
+from .engine import Tensor
 
 class Module:
 
