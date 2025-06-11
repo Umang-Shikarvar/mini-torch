@@ -6,7 +6,7 @@ class Tensor:
         self.grad = np.zeros_like(self.data)
         self._backward = lambda: None
         self.children = set(children)
-        self.op = _op
+        self._op = _op
         self.requires_grad = requires_grad
 
     def __repr__(self):
@@ -76,7 +76,7 @@ class Tensor:
         if not isinstance(power, (int, float)):
             raise TypeError("Power must be an integer or float.")
         
-        out = Tensor(self.data ** power, children=(self,), _op='**',requires_grad=self.requires_grad)
+        out = Tensor(self.data ** power, children=(self,), _op='**', requires_grad=self.requires_grad)
 
         def _backward():
             if self.requires_grad:
