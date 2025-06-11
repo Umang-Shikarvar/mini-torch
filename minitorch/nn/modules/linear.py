@@ -1,20 +1,6 @@
 import random
-from .engine import Tensor
-
-class Module:
-
-    def zero_grad(self):
-        for p in self.parameters():
-            p.zero_grad()
-
-    def parameters(self):
-        return []
-    
-    def __call__(self,x):
-        return self.forward(x)
-    
-    def forward(self, x):
-        raise NotImplementedError("Forward method must be implemented in subclasses.")
+from minitorch.engine import Tensor
+from .module import Module
 
 class Linear(Module):
     def __init__(self,in_features, out_features, bias=True):
