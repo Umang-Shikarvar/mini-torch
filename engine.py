@@ -71,8 +71,50 @@ class Tensor:
 
         return out
 
+    def __pow__(self, power):
+        if not isinstance(power, (int, float)):
+            raise TypeError("Power must be an integer or float.")
 
+        out = Tensor(self.data ** power, children=(self,), requires_grad=self.requires_grad)
 
+        def _backward():
+            if self.requires_grad:
+                grad_self = out.grad * power * (self.data ** (power - 1))
+                while grad_self.ndim > self.data.ndim:
+                    grad_self = grad_self.sum(axis=0)
+                for axis, size in enumerate(self.data.shape):
+                    if size == 1:
+                        grad_self = grad_self.sum(axis=axis, keepdims=True)
+                self.grad += grad_self
+        out._backward = _backward
+
+        return out
+
+    def __neg__(self):      # -self
+        return self * -1
+    
+    def __sub__(self, other):       # self - other
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return self + (-other)
+    
+    def __radd__(self, other):      # other + self
+        return self+other
+    
+    def __rsub__(self, other):      # other - self
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return other + (-self)
+    
+    def __rmul__(self, other):      # other * self
+        return self * other
+
+    def __truediv__(self, other):       # self / other
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return self * (other ** -1)
+
+    def __rtruediv__(self, other):      # other / self
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return other * (self ** -1)
+    
 
 
     
