@@ -1,11 +1,12 @@
 import numpy as np
 
 class Tensor:
-    def __init__(self, data, children=(), requires_grad=True):
+    def __init__(self, data, children=(), _op='', requires_grad=True):
         self.data = np.array(data)
         self.grad = np.zeros_like(self.data)
         self._backward = lambda: None
         self.children = set(children)
+        self.op = _op
         self.requires_grad = requires_grad
 
     def __repr__(self):
@@ -16,7 +17,7 @@ class Tensor:
 
         requires_grad = self.requires_grad or other.requires_grad
         try:
-            out = Tensor(self.data + other.data, children=(self, other), requires_grad=requires_grad)
+            out = Tensor(self.data + other.data, children=(self, other), _op='+',requires_grad=requires_grad)
         except ValueError as e:
             raise ValueError(f"Tensor shapes {self.data.shape} and {other.data.shape} are not compatible for addition.") from e
 
@@ -46,7 +47,7 @@ class Tensor:
 
         requires_grad = self.requires_grad or other.requires_grad
         try:
-            out = Tensor(self.data * other.data, children=(self, other), requires_grad=requires_grad)
+            out = Tensor(self.data * other.data, children=(self, other), _op='*',requires_grad=requires_grad)
         except ValueError as e:
             raise ValueError(f"Tensor shapes {self.data.shape} and {other.data.shape} are not compatible for multiplication.") from e
 
@@ -74,8 +75,8 @@ class Tensor:
     def __pow__(self, power):
         if not isinstance(power, (int, float)):
             raise TypeError("Power must be an integer or float.")
-
-        out = Tensor(self.data ** power, children=(self,), requires_grad=self.requires_grad)
+        
+        out = Tensor(self.data ** power, children=(self,), _op='**',requires_grad=self.requires_grad)
 
         def _backward():
             if self.requires_grad:
