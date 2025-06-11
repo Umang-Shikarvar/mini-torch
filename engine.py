@@ -75,7 +75,7 @@ class Tensor:
     def __pow__(self, power):
         if not isinstance(power, (int, float)):
             raise TypeError("Power must be an integer or float.")
-
+        
         out = Tensor(self.data ** power, children=(self,), _op='**',requires_grad=self.requires_grad)
 
         def _backward():
