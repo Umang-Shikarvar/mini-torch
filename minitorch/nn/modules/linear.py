@@ -1,20 +1,24 @@
 import random
 from minitorch.engine import Tensor
 from .module import Module
+from ..parameter import Parameter
 
 class Linear(Module):
-    def __init__(self,in_features, out_features, bias=True):
+    def __init__(self,in_features, out_features, bias=True) -> None:
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
         k= 1 / (in_features ** 0.5)
-        self.weight = Tensor([[random.uniform(-k, k) for _ in range(out_features)] for _ in range(in_features)])
-        self.bias = Tensor([random.uniform(-k, k) for _ in range(out_features)]) if bias else None
+        
+        weight_data = [[random.uniform(-k, k) for _ in range(out_features)] for _ in range(in_features)]
+        self.weight = Parameter(Tensor(weight_data)) 
 
-    def parameters(self):
-        params = [self.weight]
-        if self.bias is not None:
-            params.append(self.bias)
-        return params
+        if bias:
+            bias_data = [random.uniform(-k, k) for _ in range(out_features)]
+            self.bias = Parameter(Tensor(bias_data))
+        else:
+            self.bias = None
+
     
     def forward(self, x):
         if not isinstance(x, Tensor):

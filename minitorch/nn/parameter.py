@@ -1,8 +1,8 @@
 from minitorch.engine import Tensor
 
 class Parameter(Tensor):
-    def __init__(self, data):
-        super().__init__(data)
+    def __init__(self, tensor):
+        super().__init__(tensor.data)
         self.requires_grad = True
 
     def __repr__(self):

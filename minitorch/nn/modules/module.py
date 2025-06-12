@@ -38,3 +38,12 @@ class Module:
 
     def forward(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement the forward method.")
+    
+    def __repr__(self):
+        rep = f"{self.__class__.__name__}(\n"
+        for name, param in self._parameters.items():
+            rep += f"  ({name}): {param},\n"
+        for name, module in self._modules.items():
+            rep += f"  ({name}): {module},\n"
+        rep += ")"
+        return rep

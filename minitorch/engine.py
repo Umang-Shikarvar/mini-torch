@@ -9,7 +9,7 @@ def _handle_broadcasting(grad, target_shape):
     return grad
 
 class Tensor:
-    def __init__(self, data, children=(), _op='', requires_grad=True):
+    def __init__(self, data, children=(), _op='', requires_grad= False):
         self.data = np.array(data, dtype=float)
         self.grad = np.zeros_like(self.data, dtype=float)
         self._backward = lambda: None
@@ -17,8 +17,14 @@ class Tensor:
         self._op = _op
         self.requires_grad = requires_grad
 
+    # def __repr__(self):
+    #     return f"tensor(data={self.data}, grad={self.grad})"
+
     def __repr__(self):
-        return f"Tensor(data={self.data}, grad={self.grad})"
+        data_str = np.round(self.data, 4)
+        grad_str = ", requires_grad=True" if self.requires_grad else ""
+        return f"tensor({data_str}{grad_str})"
+
     
     @property
     def shape(self):
