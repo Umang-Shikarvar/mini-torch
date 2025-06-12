@@ -18,12 +18,12 @@ class Tensor:
         self.requires_grad = requires_grad
 
     def __repr__(self):
-        return f"Tensor(data={self.data}, grad={self.grad})"
+        data_str = np.array2string(self.data,precision=4,suppress_small=True,separator=', ',prefix='Tensor(')
+        return f"Tensor({data_str}, requires_grad={self.requires_grad})"
     
     @property
     def shape(self):
         return self.data.shape
-
     
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
