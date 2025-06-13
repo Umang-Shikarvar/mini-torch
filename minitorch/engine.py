@@ -29,7 +29,6 @@ class Tensor:
     @property
     def shape(self):
         return self.data.shape
-
     
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
