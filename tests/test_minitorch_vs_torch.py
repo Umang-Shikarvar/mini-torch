@@ -7,6 +7,8 @@ import torch
 import numpy as np
 import pytest
 from minitorch import Tensor, exp, log
+from minitorch.nn.modules.linear import Linear
+from minitorch.nn.parameter import Parameter
 
 def assert_tensor_allclose(t1, t2, atol=1e-6):
     assert np.allclose(np.array(t1.data), np.array(t2.detach().cpu().numpy()), atol=atol)
@@ -177,3 +179,39 @@ def test_log_function():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+
+def test_linear_forward_and_backward():
+    torch.manual_seed(42)
+    np.random.seed(42)
+    x_np = np.random.randn(4, 3)
+    x = Tensor(x_np)
+    x_torch = torch.tensor(x_np, dtype=torch.float32, requires_grad=True)
+    minitorch_linear = Linear(3, 2)
+    torch_linear = torch.nn.Linear(3, 2)
+    torch_linear.weight.data = torch.tensor(minitorch_linear.weight.data, dtype=torch.float32)
+    if minitorch_linear.bias is not None:
+        torch_linear.bias.data = torch.tensor(minitorch_linear.bias.data, dtype=torch.float32)
+    y = minitorch_linear(x)
+    y_torch = torch_linear(x_torch)
+    assert_tensor_allclose(y, y_torch)
+    grad = np.ones_like(y.data)
+    y.backward(grad)
+    y_torch.backward(torch.ones_like(y_torch))
+    assert np.allclose(np.array(minitorch_linear.weight.data), np.array(torch_linear.weight.data), atol=1e-6)
+    if minitorch_linear.bias is not None:
+        assert_tensor_allclose(minitorch_linear.bias, torch_linear.bias)
+    assert_tensor_allclose(x, x_torch)
+
+def test_parameter_zero_grad():
+    p = Parameter(Tensor([1.0, 2.0, 3.0]))
+    p.grad = Tensor([0.1, 0.2, 0.3])
+    p.zero_grad()
+    assert np.allclose(np.array(p.grad.data), 0.0)
+
+def test_module_zero_grad():
+    lin = Linear(3, 2)
+    for param in lin.parameters():
+        param.grad = Tensor(np.ones_like(param.data))
+    lin.zero_grad()
+    for param in lin.parameters():
+        assert np.allclose(np.array(param.grad.data), 0.0)
