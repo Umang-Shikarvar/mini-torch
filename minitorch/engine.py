@@ -9,7 +9,7 @@ def _handle_broadcasting(grad, target_shape):
     return grad
 
 class Tensor:
-    def __init__(self, data, children=(), _op='', requires_grad= False):
+    def __init__(self, data, children=(), _op='', requires_grad= True):
         self.data = np.array(data, dtype=float)
         self.grad = np.zeros_like(self.data, dtype=float)
         self._backward = lambda: None
@@ -19,6 +19,11 @@ class Tensor:
 
     # def __repr__(self):
     #     return f"tensor(data={self.data}, grad={self.grad})"
+
+    def item(self):
+        if self.data.size != 1:
+            raise ValueError("Cannot convert a tensor with more than one element to a scalar.")
+        return self.data.item()
 
     def __repr__(self):
         data_str = np.round(self.data, 4)
