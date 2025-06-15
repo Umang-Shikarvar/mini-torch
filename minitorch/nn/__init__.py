@@ -1,3 +1,2 @@
-from .parameter import Parameter
-from .modules.module import Module
-from .modules.linear import Linear
+from minitorch.nn.parameter import Parameter
+from minitorch.nn.modules import *
