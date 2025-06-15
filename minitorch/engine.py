@@ -32,6 +32,17 @@ class Tensor:
     def shape(self):
         return self.data.shape
     
+    @property
+    def T(self):
+        out = Tensor(self.data.T, children=(self,), _op='T', requires_grad=self.requires_grad)
+        def _backward():
+            if self.requires_grad:
+                grad_self = out.grad.T
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
+                self.grad += grad_self
+        out._backward = _backward
+        return out
+    
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
 
@@ -141,6 +152,22 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def transpose(self, dim0, dim1):
+        # Swap two axes and return a new Tensor with autograd support
+        axes = list(range(self.data.ndim))
+        axes[dim0], axes[dim1] = axes[dim1], axes[dim0]
+        out = Tensor(self.data.transpose(axes), children=(self,), _op=f'transpose({dim0},{dim1})', requires_grad=self.requires_grad)
+        def _backward():
+            if self.requires_grad:
+                # Reverse the axes swap for the gradient
+                reverse_axes = list(range(self.data.ndim))
+                reverse_axes[dim0], reverse_axes[dim1] = reverse_axes[dim1], reverse_axes[dim0]
+                grad_self = out.grad.transpose(reverse_axes)
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
+                self.grad += grad_self
+        out._backward = _backward
+        return out
+    
     
     def backward(self, grad=None):
         if not self.requires_grad:
@@ -218,3 +245,8 @@ def log(tensor):
     return out
 Tensor.log = log
 
+def transpose(input, dim0, dim1):
+    """Like torch.transpose: returns a new tensor with dim0 and dim1 swapped."""
+    if not isinstance(input, Tensor):
+        input = Tensor(input)
+    return input.transpose(dim0, dim1)
