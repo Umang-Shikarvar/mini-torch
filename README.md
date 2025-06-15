@@ -1,10 +1,24 @@
 # mini-torch
 
-Maintainers:
+**Maintainers:**
 1. [Shardul Junagade](https://github.com/ShardulJunagade)
 2. [Umang Shikarvar](https://github.com/Umang-Shikarvar)
 3. [Soham Gaonkar](https://github.com/Soham-Gaonkar)
 
+
+
+### How to use minitorch in subfolders?
+In python scripts, you can import `minitorch` in subfolders by adding the parent directory to the path.
+```python
+import sys
+sys.path.append('../')
+```
+
+In Jupyter Notebooks, you can use the following code to add the parent directory to the path:
+```python
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+```
 
 
 
