@@ -1,2 +1,2 @@
 from .engine import Tensor
-from .engine import log, exp, pow, transpose
+from .functional import exp, log, pow, transpose
