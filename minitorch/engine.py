@@ -16,10 +16,7 @@ class Tensor:
         self.children = set(children)
         self._op = _op
         self.requires_grad = requires_grad
-
-    # def __repr__(self):
-    #     return f"tensor(data={self.data}, grad={self.grad})"
-
+    
     def item(self):
         if self.data.size != 1:
             raise ValueError("Cannot convert a tensor with more than one element to a scalar.")
