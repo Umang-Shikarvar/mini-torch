@@ -67,3 +67,27 @@ def test_minitorch_transpose_func():
     y.backward(np.ones_like(y.data))
     y_torch.backward(torch.ones_like(y_torch))
     assert_tensor_allclose(x, x_torch)
+
+def test_T_2d_dtype():
+    x_np = np.random.randn(2, 3).astype(np.float32)
+    x = minitorch.Tensor(x_np, dtype=minitorch.float32)
+    x_torch = torch.tensor(x_np, dtype=torch.float32, requires_grad=True)
+    y = x.T
+    y_torch = x_torch.T
+    assert y.dtype == 'minitorch.float32'
+    assert_tensor_allclose(y, y_torch)
+    y.backward(np.ones_like(y.data, dtype=minitorch.float32))
+    y_torch.backward(torch.ones_like(y_torch))
+    assert_tensor_allclose(x, x_torch)
+
+def test_transpose_2d_dtype():
+    x_np = np.random.randn(2, 3).astype(np.float32)
+    x = minitorch.Tensor(x_np, dtype=minitorch.float32)
+    x_torch = torch.tensor(x_np, dtype=torch.float32, requires_grad=True)
+    y = x.transpose(0, 1)
+    y_torch = x_torch.transpose(0, 1)
+    assert y.dtype == 'minitorch.float32'
+    assert_tensor_allclose(y, y_torch)
+    y.backward(np.ones_like(y.data, dtype=minitorch.float32))
+    y_torch.backward(torch.ones_like(y_torch))
+    assert_tensor_allclose(x, x_torch)

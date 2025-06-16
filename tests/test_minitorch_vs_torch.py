@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import torch
 import numpy as np
 import pytest
+import minitorch
 from minitorch import Tensor, exp, log
 from minitorch.nn.modules.linear import Linear
 from minitorch.nn.parameter import Parameter
@@ -214,3 +215,61 @@ def test_module_zero_grad():
     lin.zero_grad()
     for param in lin.parameters():
         assert np.allclose(np.array(param.grad.data), 0.0)
+
+
+# --- DTYPE TESTS FOR FLOAT32/BOOL ONLY ---
+def test_tensor_dtype_construction_supported():
+    a = Tensor([1, 2, 3], dtype=minitorch.float)
+    assert a.data.dtype == minitorch.float32
+    b = Tensor([True, False, True], dtype=minitorch.bool)
+    assert b.data.dtype == minitorch.bool
+    c = Tensor([1, 2, 3], dtype=minitorch.float32)
+    assert c.data.dtype == minitorch.float32
+    d = Tensor([True, False, True], dtype=minitorch.bool)
+    assert d.data.dtype == minitorch.bool
+
+def test_tensor_dtype_construction_unsupported():
+    with pytest.raises(TypeError):
+        Tensor([1, 2, 3], dtype='int32')
+    with pytest.raises(TypeError):
+        Tensor([1, 2, 3], dtype=int)
+    with pytest.raises(TypeError):
+        Tensor([1.0, 2.0, 3.0], dtype='float64')
+
+def test_tensor_default_dtype():
+    a = Tensor([1, 2, 3])
+    assert a.data.dtype == minitorch.float32
+    b = Tensor([True, False, True])
+    assert b.data.dtype == minitorch.bool
+    c = Tensor([1.0, 2.0, 3.0])
+    assert c.data.dtype == minitorch.float32
+
+def test_tensor_dtype_operations():
+    a = Tensor([1, 2, 3], dtype=minitorch.float)
+    b = Tensor([4, 5, 6], dtype=minitorch.float32)
+    c = a + b
+    assert c.data.dtype == minitorch.float32
+    d = a * b
+    assert d.data.dtype == minitorch.float32
+    e = a ** 2
+    assert e.data.dtype == minitorch.float32
+    f = a - b
+    assert f.data.dtype == minitorch.float32
+    g = a / b
+    assert g.data.dtype == minitorch.float32
+    # Boolean operations
+    h = Tensor([True, False, True], dtype=minitorch.bool)
+    i = Tensor([False, True, True], dtype=minitorch.bool)
+    j = h * i
+    assert j.data.dtype == minitorch.bool
+
+def test_tensor_grad_dtype():
+    a = Tensor([1.0, 2.0, 3.0], dtype=minitorch.float, requires_grad=True)
+    b = Tensor([4.0, 5.0, 6.0], dtype=minitorch.float32, requires_grad=True)
+    c = a * b
+    c.backward(np.ones_like(c.data, dtype=minitorch.float32))
+    assert a.grad.dtype == minitorch.float32
+    assert b.grad.dtype == minitorch.float32
+    # Boolean tensor should not have grad
+    d = Tensor([True, False, True], dtype=minitorch.bool)
+    assert d.grad is None

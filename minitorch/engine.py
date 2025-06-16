@@ -1,4 +1,5 @@
 import numpy as np
+import minitorch
 
 def _handle_broadcasting(grad, target_shape):
     while grad.ndim > len(target_shape):
@@ -9,9 +10,46 @@ def _handle_broadcasting(grad, target_shape):
     return grad
 
 class Tensor:
-    def __init__(self, data, children=(), _op='', requires_grad= True):
-        self.data = np.array(data, dtype=float)
-        self.grad = np.zeros_like(self.data, dtype=float)
+    def __hash__(self):
+        return id(self)
+    
+    def __init__(self, data, children=(), _op='', requires_grad=True, dtype=None):
+        # Use minitorch.float32 and minitorch.bool as canonical dtypes
+        valid_dtypes = {minitorch.float32, minitorch.bool, float, bool, 'float32', 'bool'}
+        def resolve_dtype(dt):
+            if dt is None:
+                return None
+            if dt is minitorch.float32 or dt is float or dt == 'float32':
+                return minitorch.float32
+            if dt is minitorch.bool or dt is bool or dt == 'bool':
+                return minitorch.bool
+            raise TypeError(f"Only float32 and bool dtypes are supported, got {dt}.")
+
+        resolved_dtype = resolve_dtype(dtype)
+
+        # If data is already a numpy array
+        if isinstance(data, np.ndarray):
+            if resolved_dtype is not None:
+                self.data = data.astype(resolved_dtype)
+            else:
+                if data.dtype == minitorch.bool:
+                    self.data = data.astype(minitorch.bool)
+                else:
+                    self.data = data.astype(minitorch.float32)
+        else:
+            if resolved_dtype is not None:
+                self.data = np.array(data, dtype=resolved_dtype)
+            else:
+                temp = np.array(data)
+                if temp.dtype == minitorch.bool:
+                    self.data = temp.astype(minitorch.bool)
+                else:
+                    self.data = temp.astype(minitorch.float32)
+        self._dtype = self.data.dtype
+        if self._dtype == minitorch.float32:
+            self.grad = np.zeros_like(self.data, dtype=self._dtype)
+        else:
+            self.grad = None
         self._backward = lambda: None
         self.children = set(children)
         self._op = _op
@@ -23,14 +61,21 @@ class Tensor:
         return self.data.item()
 
     def __repr__(self):
-        data_str = np.round(self.data, 4)
+        if np.issubdtype(self._dtype, np.floating):
+            data_str = np.array2string(self.data, precision=4, separator=', ', suppress_small=False)
+        else:
+            data_str = np.array2string(self.data, separator=', ')
         grad_str = ", requires_grad=True" if self.requires_grad else ""
         return f"tensor({data_str}{grad_str})"
-
     
     @property
-    def shape(self):
-        return self.data.shape
+    def dtype(self):
+        if self._dtype == minitorch.float32:
+            return 'minitorch.float32'
+        elif self._dtype == minitorch.bool:
+            return 'minitorch.bool'
+        else:
+            raise TypeError(f"Tensor dtype {self._dtype} is not supported.")
     
     @property
     def T(self):
@@ -152,6 +197,30 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def __lt__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data < other.data, children=(self, other), _op='lt', requires_grad=False, dtype=minitorch.bool)
+
+    def __le__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data <= other.data, children=(self, other), _op='le', requires_grad=False, dtype=minitorch.bool)
+
+    def __gt__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data > other.data, children=(self, other), _op='gt', requires_grad=False, dtype=minitorch.bool)
+
+    def __ge__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data >= other.data, children=(self, other), _op='ge', requires_grad=False, dtype=minitorch.bool)
+
+    def __eq__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data == other.data, children=(self, other), _op='eq', requires_grad=False, dtype=minitorch.bool)
+
+    def __ne__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(self.data != other.data, children=(self, other), _op='ne', requires_grad=False, dtype=minitorch.bool)
+
     def exp(self):
         from .functional import exp
         return exp(self)
@@ -192,10 +261,10 @@ class Tensor:
             tensor._backward()
 
     def zero_grad(self):
-        topo= []
+        topo = []
         visited = set()
         def topo_sort(tensor):
-            if(tensor not in visited):
+            if tensor not in visited:
                 visited.add(tensor)
                 for child in tensor.children:
                     topo_sort(child)

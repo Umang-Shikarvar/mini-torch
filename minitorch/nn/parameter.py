@@ -1,6 +1,9 @@
 import minitorch
 
 class Parameter(minitorch.Tensor):
+    def __hash__(self):
+        return id(self)
+    
     def __init__(self, tensor):
         if not isinstance(tensor, minitorch.Tensor):
              tensor = minitorch.Tensor(tensor) # Ensure tensor is a Tensor instance

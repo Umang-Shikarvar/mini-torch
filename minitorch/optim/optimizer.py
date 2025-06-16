@@ -20,7 +20,7 @@ class SGD:
     def zero_grad(self):
         for param in self.params:
             if param.grad is not None:
-                param.graad = 0.0 
+                param.grad = 0.0 
 
     def __repr__(self):
         return f"SGD(lr={self.lr}) with parameters: {[param for param in self.params]}"

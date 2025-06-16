@@ -6,6 +6,7 @@
 3. [Soham Gaonkar](https://github.com/Soham-Gaonkar)
 
 
+## Usage
 
 ### How to use minitorch in subfolders?
 In python scripts, you can import `minitorch` in subfolders by adding the parent directory to the path.
@@ -47,7 +48,7 @@ for /d /r . %d in (__pycache__) do @if exist "%d" rd /s /q "%d"
 ```
 
 
-## 🚀 How to contribute? (for Maintainers)
+## 🚀 Maintainer Contribution Workflow (No PRs)
 1. Create a new branch for your changes:
    ```bash
    git checkout -b feature/your-feature-name
