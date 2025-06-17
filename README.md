@@ -1,4 +1,4 @@
-# mini-torch
+# miniTorch
 
 **Maintainers:**
 1. [Shardul Junagade](https://github.com/ShardulJunagade)
