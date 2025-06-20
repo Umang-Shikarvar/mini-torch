@@ -50,3 +50,44 @@ def transpose(tensor, dim0, dim1):
             tensor.grad += grad_self
     out._backward = _backward
     return out
+
+def relu(tensor):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    out = Tensor(np.maximum(0, tensor.data), children=(tensor,), _op='relu', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad * (tensor.data > 0)
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
+
+def sigmoid(tensor):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    sig = 1 / (1 + np.exp(-tensor.data))
+    out = Tensor(sig, children=(tensor,), _op='sigmoid', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad * sig * (1 - sig)
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
+
+def tanh(tensor):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    tanh_val = np.tanh(tensor.data)
+    out = Tensor(tanh_val, children=(tensor,), _op='tanh', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad * (1 - tanh_val ** 2)
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
