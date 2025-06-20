@@ -237,7 +237,18 @@ class Tensor:
         from .functional import transpose
         return transpose(self, dim0, dim1)
     
-    
+    def relu(self):
+        from .functional import relu
+        return relu(self)
+
+    def sigmoid(self):
+        from .functional import sigmoid
+        return sigmoid(self)
+
+    def tanh(self):
+        from .functional import tanh
+        return tanh(self)
+
     def backward(self, grad=None):
         if not self.requires_grad:
             raise RuntimeError("Cannot call backward on a tensor that does not require gradients.")

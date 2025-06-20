@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import pytest
 import minitorch
-from minitorch import Tensor, exp, log
+from minitorch import Tensor, exp, log, relu, sigmoid, tanh
 from minitorch.nn.modules.linear import Linear
 from minitorch.nn.parameter import Parameter
 
@@ -178,6 +178,36 @@ def test_log_function():
     assert_tensor_allclose(c, t_c)
     c.backward()
     t_c.backward()
+    assert_tensor_allclose(a, t_a)
+
+def test_relu_function():
+    a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    c = relu(a)
+    t_a = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    t_c = torch.relu(t_a)
+    assert_tensor_allclose(c, t_c)
+    c.backward(np.ones_like(c.data))
+    t_c.backward(torch.ones_like(t_c))
+    assert_tensor_allclose(a, t_a)
+
+def test_sigmoid_function():
+    a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    c = sigmoid(a)
+    t_a = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    t_c = torch.sigmoid(t_a)
+    assert_tensor_allclose(c, t_c)
+    c.backward(np.ones_like(c.data))
+    t_c.backward(torch.ones_like(t_c))
+    assert_tensor_allclose(a, t_a)
+
+def test_tanh_function():
+    a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    c = tanh(a)
+    t_a = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    t_c = torch.tanh(t_a)
+    assert_tensor_allclose(c, t_c)
+    c.backward(np.ones_like(c.data))
+    t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
 
 def test_linear_forward_and_backward():
