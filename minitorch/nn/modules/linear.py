@@ -3,6 +3,8 @@ from minitorch.engine import Tensor
 from .module import Module
 from ..parameter import Parameter
 
+import numpy as np
+
 class Linear(Module):
     def __init__(self,in_features, out_features, bias=True) -> None:
         super().__init__()
@@ -10,12 +12,14 @@ class Linear(Module):
         self.out_features = out_features
         k= 1 / (in_features ** 0.5)
         
-        weight_data = [[random.uniform(-k, k) for _ in range(out_features)] for _ in range(in_features)]
-        self.weight = Parameter(Tensor(weight_data)) 
+        # weight_data = [[random.uniform(-k, k) for _ in range(out_features)] for _ in range(in_features)]
+        weight_data = np.random.uniform(-k, k, size=(in_features, out_features)).tolist()
+        self.weight = Parameter(Tensor(weight_data), name='weight') 
 
         if bias:
-            bias_data = [random.uniform(-k, k) for _ in range(out_features)]
-            self.bias = Parameter(Tensor(bias_data))
+            # bias_data = [random.uniform(-k, k) for _ in range(out_features)]
+            bias_data = np.random.uniform(-k, k, size=(out_features)).tolist()
+            self.bias = Parameter(Tensor(bias_data), name='bias')
         else:
             self.bias = None
 
