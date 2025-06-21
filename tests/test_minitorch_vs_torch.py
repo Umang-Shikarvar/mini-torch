@@ -210,6 +210,28 @@ def test_tanh_function():
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
 
+def test_leaky_relu_function():
+    import torch.nn.functional as F
+    a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    c = minitorch.functional.leaky_relu(a, negative_slope=0.1)
+    t_a = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+    t_c = F.leaky_relu(t_a, negative_slope=0.1)
+    assert_tensor_allclose(c, t_c)
+    c.backward(np.ones_like(c.data))
+    t_c.backward(torch.ones_like(t_c))
+    assert_tensor_allclose(a, t_a)
+
+def test_softmax_function():
+    import torch.nn.functional as F
+    a = Tensor([[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]], requires_grad=True)
+    c = minitorch.functional.softmax(a, dim=1)
+    t_a = torch.tensor([[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]], requires_grad=True)
+    t_c = F.softmax(t_a, dim=1)
+    assert_tensor_allclose(c, t_c)
+    c.backward(np.ones_like(c.data))
+    t_c.backward(torch.ones_like(t_c))
+    assert_tensor_allclose(a, t_a)
+
 def test_linear_forward_and_backward():
     torch.manual_seed(42)
     np.random.seed(42)

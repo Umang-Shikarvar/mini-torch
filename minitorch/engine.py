@@ -237,9 +237,14 @@ class Tensor:
         from .functional import transpose
         return transpose(self, dim0, dim1)
     
+
     def relu(self):
         from .functional import relu
         return relu(self)
+
+    def leaky_relu(self, negative_slope=0.01):
+        from .functional import leaky_relu
+        return leaky_relu(self, negative_slope=negative_slope)
 
     def sigmoid(self):
         from .functional import sigmoid
@@ -248,6 +253,10 @@ class Tensor:
     def tanh(self):
         from .functional import tanh
         return tanh(self)
+
+    def softmax(self, dim=-1):
+        from .functional import softmax
+        return softmax(self, dim=dim)
 
     def backward(self, grad=None):
         if not self.requires_grad:

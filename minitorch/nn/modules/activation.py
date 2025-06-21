@@ -1,7 +1,5 @@
 from minitorch.nn.modules.module import Module
-from minitorch.functional import relu as functional_relu
-from minitorch.functional import sigmoid as functional_sigmoid
-from minitorch.functional import tanh as functional_tanh
+import minitorch.functional as F
 from minitorch.engine import Tensor
 
 class ReLU(Module):
@@ -9,17 +7,29 @@ class ReLU(Module):
         super().__init__()
 
     def forward(self, input: Tensor) -> Tensor:
-        return functional_relu(input)
+        return F.relu(input)
 
     def __repr__(self):
         return "ReLU()"
+
+
+class LeakyReLU(Module):
+    def __init__(self, negative_slope=0.01):
+        super().__init__()
+        self.negative_slope = negative_slope
+
+    def forward(self, input: Tensor) -> Tensor:
+        return F.leaky_relu(input, negative_slope=self.negative_slope)
+
+    def __repr__(self):
+        return f"LeakyReLU(negative_slope={self.negative_slope})"
 
 class Sigmoid(Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, input: Tensor) -> Tensor:
-        return functional_sigmoid(input)
+        return F.sigmoid(input)
 
     def __repr__(self):
         return "Sigmoid()"
@@ -29,7 +39,18 @@ class Tanh(Module):
         super().__init__()
 
     def forward(self, input: Tensor) -> Tensor:
-        return functional_tanh(input)
+        return F.tanh(input)
 
     def __repr__(self):
         return "Tanh()"
+
+class Softmax(Module):
+    def __init__(self, dim=-1):
+        super().__init__()
+        self.dim = dim
+
+    def forward(self, input: Tensor) -> Tensor:
+        return F.softmax(input, dim=self.dim)
+
+    def __repr__(self):
+        return f"Softmax(dim={self.dim})"

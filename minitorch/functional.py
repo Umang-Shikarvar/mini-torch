@@ -93,3 +93,38 @@ def tanh(tensor):
     out._backward = _backward
 
     return out
+
+def leaky_relu(tensor, negative_slope=0.01):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    leaky_relu_val = np.where(tensor.data > 0, tensor.data, negative_slope * tensor.data)
+    out = Tensor(leaky_relu_val, children=(tensor,), _op='leaky_relu', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            mask = (tensor.data > 0).astype(tensor.data.dtype) + negative_slope * (tensor.data <= 0).astype(tensor.data.dtype)
+            grad_self = out.grad * mask
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
+
+def softmax(tensor, dim=-1):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    shifted = tensor.data - np.max(tensor.data, axis=dim, keepdims=True)
+    exps = np.exp(shifted)
+    softmax_val = exps / np.sum(exps, axis=dim, keepdims=True)
+    out = Tensor(softmax_val, children=(tensor,), _op='softmax', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = np.empty_like(out.data)
+            for i in range(out.data.shape[0]):
+                s = out.data[i].reshape(-1, 1)
+                jacobian = np.diagflat(s) - np.dot(s, s.T)
+                grad_self[i] = np.dot(jacobian, out.grad[i])
+            grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+
+    return out
