@@ -26,7 +26,9 @@ def test_add():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
     assert_tensor_allclose(b, t_b)
+    assert np.allclose(b.grad, t_b.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_mul():
     a = Tensor(2.0)
@@ -39,7 +41,9 @@ def test_mul():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
     assert_tensor_allclose(b, t_b)
+    assert np.allclose(b.grad, t_b.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_pow():
     a = Tensor(2.0)
@@ -50,6 +54,7 @@ def test_pow():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_exp():
     a = Tensor(1.5)
@@ -60,6 +65,7 @@ def test_exp():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_log():
     a = Tensor(2.0)
@@ -70,6 +76,7 @@ def test_log():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_neg():
     a = Tensor(2.0)
@@ -80,6 +87,7 @@ def test_neg():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_sub():
     a = Tensor(5.0)
@@ -92,7 +100,9 @@ def test_sub():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
     assert_tensor_allclose(b, t_b)
+    assert np.allclose(b.grad, t_b.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_truediv():
     a = Tensor(6.0)
@@ -105,7 +115,9 @@ def test_truediv():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
     assert_tensor_allclose(b, t_b)
+    assert np.allclose(b.grad, t_b.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_matmul():
     a = Tensor([[1.0, 2.0], [3.0, 4.0]])
@@ -118,7 +130,9 @@ def test_matmul():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
     assert_tensor_allclose(b, t_b)
+    assert np.allclose(b.grad, t_b.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_radd():
     a = Tensor(2.0)
@@ -129,6 +143,7 @@ def test_radd():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_rsub():
     a = Tensor(2.0)
@@ -139,6 +154,7 @@ def test_rsub():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_rmul():
     a = Tensor(2.0)
@@ -149,6 +165,7 @@ def test_rmul():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_rtruediv():
     a = Tensor(2.0)
@@ -159,6 +176,7 @@ def test_rtruediv():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_exp_function():
     a = Tensor(1.5)
@@ -169,6 +187,7 @@ def test_exp_function():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_log_function():
     a = Tensor(2.0)
@@ -179,6 +198,7 @@ def test_log_function():
     c.backward()
     t_c.backward()
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_relu_function():
     a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
@@ -189,6 +209,7 @@ def test_relu_function():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_sigmoid_function():
     a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
@@ -199,6 +220,7 @@ def test_sigmoid_function():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_tanh_function():
     a = Tensor([-1.0, 0.0, 2.0], requires_grad=True)
@@ -209,6 +231,7 @@ def test_tanh_function():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_leaky_relu_function():
     import torch.nn.functional as F
@@ -220,6 +243,7 @@ def test_leaky_relu_function():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_softmax_function():
     import torch.nn.functional as F
@@ -231,6 +255,7 @@ def test_softmax_function():
     c.backward(np.ones_like(c.data))
     t_c.backward(torch.ones_like(t_c))
     assert_tensor_allclose(a, t_a)
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
 def test_linear_forward_and_backward():
     torch.manual_seed(42)
