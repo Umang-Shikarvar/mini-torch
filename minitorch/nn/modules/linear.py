@@ -13,8 +13,8 @@ class Linear(Module):
         self.out_features = out_features
         k= 1 / (in_features ** 0.5)
         
-        # weight_data = [[random.uniform(-k, k) for _ in range(out_features)] for _ in range(in_features)]
-        weight_data = np.random.uniform(-k, k, size=(in_features, out_features)).tolist()
+        # weight_data = [[random.uniform(-k, k) for _ in range(in_features)] for _ in range(out_features)]
+        weight_data = np.random.uniform(-k, k, size=(out_features, in_features)).tolist()
         self.weight = Parameter(minitorch.Tensor(weight_data), name='weight') 
 
         if bias:

@@ -69,6 +69,10 @@ class Tensor:
         return f"tensor({data_str}{grad_str})"
     
     @property
+    def shape(self):
+        return self.data.shape
+    
+    @property
     def dtype(self):
         if self._dtype == minitorch.float32:
             return 'minitorch.float32'
