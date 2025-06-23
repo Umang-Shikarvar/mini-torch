@@ -81,6 +81,18 @@ class Tensor:
                 self.grad += grad_self
         out._backward = _backward
         return out
+
+    def __setitem__(self, idx, value):
+        """
+        Set item(s) in the underlying data array. This operation is in-place and breaks the computation graph.
+        Autograd will not track this assignment. Use with caution.
+        """
+        if isinstance(value, Tensor):
+            value = value.data
+        self.data[idx] = value
+        # If gradients exist, reset them for the modified indices
+        if self.grad is not None:
+            self.grad[idx] = 0
     
     @property
     def shape(self):
