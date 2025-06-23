@@ -10,6 +10,7 @@ def _handle_broadcasting(grad, target_shape):
     return grad
 
 class Tensor:
+
     def __hash__(self):
         return id(self)
     
@@ -220,7 +221,14 @@ class Tensor:
     def __ne__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         return Tensor(self.data != other.data, children=(self, other), _op='ne', requires_grad=False, dtype=minitorch.bool)
+    
+    
+    # Functions from functional.py
 
+    def sum(self, axis=None, keepdims=False):
+        from .functional import sum
+        return sum(self, axis=axis, keepdims=keepdims)
+    
     def exp(self):
         from .functional import exp
         return exp(self)
@@ -237,7 +245,6 @@ class Tensor:
         from .functional import transpose
         return transpose(self, dim0, dim1)
     
-
     def relu(self):
         from .functional import relu
         return relu(self)
