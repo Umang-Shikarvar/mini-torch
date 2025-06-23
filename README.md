@@ -1,80 +1,61 @@
+
 # miniTorch
 
-**Maintainers:**
-1. [Shardul Junagade](https://github.com/ShardulJunagade)
-2. [Umang Shikarvar](https://github.com/Umang-Shikarvar)
-3. [Soham Gaonkar](https://github.com/Soham-Gaonkar)
+miniTorch is a minimal, educational deep learning framework inspired by PyTorch, designed for learning and experimentation. It provides a NumPy-based tensor engine, autograd, neural network modules, and basic optimizers, making it easy to understand the core concepts behind modern deep learning libraries.
 
 
-## Usage
 
-### How to use minitorch in subfolders?
-In python scripts, you can import `minitorch` in subfolders by adding the parent directory to the path.
-```python
-import sys
-sys.path.append('../')
-```
-In Jupyter Notebooks, you can use the following code to add the parent directory to the path:
-```python
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-```
+## ✨ Features
+- NumPy-based tensor operations with broadcasting
+- Autograd (automatic differentiation) support
+- Neural network modules (Linear, Activation, Sequential, etc.)
+- Basic optimizers (SGD, etc.)
+- Custom loss functions (MSELoss, etc.)
+- Utilities for data loading and batching
+- Easy-to-read code for educational purposes
 
-### How to run tests?
-You can run the tests using `pytest`. Make sure you have `pytest` installed in your environment. You can install it using pip:
+## 👤 Maintainers
+- [Shardul Junagade](https://github.com/ShardulJunagade)
+- [Umang Shikarvar](https://github.com/Umang-Shikarvar)
+- [Soham Gaonkar](https://github.com/Soham-Gaonkar)
+
+
+
+## 🚀 Installation
+
+Clone the repository:
 ```bash
-pip install pytest
+git clone https://github.com/Umang-Shikarvar/miniTorch
+cd miniTorch
 ```
-Then, you can run the tests using the following command:
+
+Install dependencies:
 ```bash
-pytest
-# or
-run_tests
+pip install -r requirements.txt
 ```
 
 
-### Clearing all the pycaches folders
-Using Bash:
+## 📚 Usage
+
+To use `minitorch` as a library in your own projects, install it in editable mode:
 ```bash
-find . -type d -name "__pycache__" -exec rm -r {} +
+pip install -e ./minitorch
 ```
-Using PowerShell:
-```powershell
-Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
-```
-Using Command Prompt:
-```cmd
-for /d /r . %d in (__pycache__) do @if exist "%d" rd /s /q "%d"
-```
+This allows you to import `minitorch` from anywhere in your environment and automatically picks up code changes.
 
 
-## 🚀 Maintainer Contribution Workflow (No PRs)
-1. Create a new branch for your changes:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-2. Make your changes and commit them:
-   ```bash
-    git add .
-    git commit -m "Add your commit message here"
-    ```
-3. Push your changes to your branch:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-4. Merge into the main branch:
-   ```bash
-   git checkout main
-   git pull origin main         # Ensure you're up to date
-   git merge feature/your-feature-name
-   ```
-   > 🔧 Resolve any merge conflicts if necessary.
-5. Push the changes to the remote repository:
-   ```bash
-    git push origin main
-    ```
-6. Update your branch with the latest changes from the main branch:
-   ```bash
-   git checkout feature/your-feature-name
-   git pull origin main
-   ```
+
+## 🛠️ Documentation & Tips
+For tips and useful commands (like clearing all __pycache__ folders), see [`tips_and_commands.md`](./docs/tips_and_commands.md).
+
+
+## 🤝 Contributing
+We welcome contributions from everyone!
+- Maintainers: see [`docs/CONTRIBUTING_maintainers.md`](./docs/CONTRIBUTING_maintainers.md)
+- Non-maintainers: see [`docs/CONTRIBUTING_non_maintainers.md`](./docs/CONTRIBUTING_non_maintainers.md)
+
+For questions, suggestions, or discussions, open an issue or start a discussion on GitHub.
+
+
+---
+Happy learning and building with miniTorch! ⭐
