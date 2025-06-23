@@ -2,21 +2,17 @@ import math
 import random
 
 class DataLoader:
-
-    def __init__(self, dataset, batch_size = 1, shuffle = True):
+    def __init__(self, dataset, batch_size=1, shuffle=True) -> None:
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
         self._reset()
         self.current_index = 0
 
- 
-    def _reset(self): # to reset the iterator after each epoch
+    def _reset(self):
         self.indices = list(range(len(self.dataset)))
-
         if self.shuffle:
             random.shuffle(self.indices)
-        
         self.current_index = 0
         
     def __iter__(self):
@@ -41,5 +37,3 @@ class DataLoader:
     
     def __repr__(self):
         return f"DataLoader(batch_size={self.batch_size}, shuffle={self.shuffle}, dataset_size={len(self.dataset)})"
-    
-    

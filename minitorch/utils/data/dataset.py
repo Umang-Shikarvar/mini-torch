@@ -1,6 +1,6 @@
 
 class Dataset:
-    def __init__(self, data):
+    def __init__(self, data) -> None:
         self.data = data
 
     def __len__(self):

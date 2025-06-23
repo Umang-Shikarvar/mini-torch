@@ -294,3 +294,17 @@ class Tensor:
         for tensor in topo:
             tensor.grad = np.zeros_like(tensor.data)
 
+    def mean(self):
+        if self.data.size == 0:
+            raise ValueError("cannot compute mean of an empty tensor")
+        
+        mean_value = np.mean(self.data)
+        out = Tensor(mean_value, children=(self,), _op='mean', requires_grad=self.requires_grad)
+        
+        def _backward():
+            if self.requires_grad:
+                grad_self = out.grad * np.ones_like(self.data) / self.data.size
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
+                self.grad += grad_self
+        out._backward = _backward
+        return out
