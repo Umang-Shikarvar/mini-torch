@@ -1,6 +1,6 @@
 
 from .engine import Tensor
-from .functional import exp, log, pow, transpose, relu, sigmoid, tanh, leaky_relu, softmax
+from .functional import sum, exp, log, pow, transpose, relu, sigmoid, tanh, leaky_relu, softmax
 
 # Canonical dtypes for all of minitorch
 import numpy as np

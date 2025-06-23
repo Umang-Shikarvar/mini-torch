@@ -10,6 +10,7 @@ def _handle_broadcasting(grad, target_shape):
     return grad
 
 class Tensor:
+
     def __hash__(self):
         return id(self)
     
@@ -67,6 +68,19 @@ class Tensor:
             data_str = np.array2string(self.data, separator=', ')
         grad_str = ", requires_grad=True" if self.requires_grad else ""
         return f"tensor({data_str}{grad_str})"
+
+    def __getitem__(self, idx):
+        # Support slicing/indexing, return a new Tensor with autograd tracking
+        out_data = self.data[idx]
+        out = Tensor(out_data, children=(self,), _op=f'getitem[{idx}]', requires_grad=self.requires_grad)
+        def _backward():
+            if self.requires_grad:
+                grad_self = np.zeros_like(self.data, dtype=self.data.dtype)
+                grad_self[idx] = out.grad
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
+                self.grad += grad_self
+        out._backward = _backward
+        return out
     
     @property
     def shape(self):
@@ -224,7 +238,14 @@ class Tensor:
     def __ne__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         return Tensor(self.data != other.data, children=(self, other), _op='ne', requires_grad=False, dtype=minitorch.bool)
+    
+    
+    # Functions from functional.py
 
+    def sum(self, axis=None, keepdims=False):
+        from .functional import sum
+        return sum(self, axis=axis, keepdims=keepdims)
+    
     def exp(self):
         from .functional import exp
         return exp(self)
@@ -241,7 +262,6 @@ class Tensor:
         from .functional import transpose
         return transpose(self, dim0, dim1)
     
-
     def relu(self):
         from .functional import relu
         return relu(self)

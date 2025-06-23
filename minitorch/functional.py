@@ -2,6 +2,28 @@
 import numpy as np
 from minitorch.engine import Tensor, _handle_broadcasting
 
+def sum(tensor, axis=None, keepdims=False):
+    tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    out = Tensor(np.sum(tensor.data, axis=axis, keepdims=keepdims), children=(tensor,), _op=f'sum(axis={axis},keepdims={keepdims})', requires_grad=tensor.requires_grad)
+
+    def _backward():
+        if tensor.requires_grad:
+            grad_self = out.grad
+            # Broadcast grad_self to the shape of tensor.data
+            if axis is not None:
+                shape = list(tensor.data.shape)
+                if not isinstance(axis, tuple):
+                    axes = (axis,)
+                else:
+                    axes = axis
+                for ax in sorted(axes):
+                    shape[ax] = 1
+                grad_self = np.reshape(grad_self, shape)
+            grad_self = np.broadcast_to(grad_self, tensor.data.shape)
+            tensor.grad += grad_self
+    out._backward = _backward
+    return out
+
 def exp(tensor):
     tensor = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
     out = Tensor(np.exp(tensor.data), children=(tensor,), _op='exp', requires_grad=tensor.requires_grad)
@@ -118,13 +140,24 @@ def softmax(tensor, dim=-1):
 
     def _backward():
         if tensor.requires_grad:
-            grad_self = np.empty_like(out.data)
-            for i in range(out.data.shape[0]):
-                s = out.data[i].reshape(-1, 1)
-                jacobian = np.diagflat(s) - np.dot(s, s.T)
-                grad_self[i] = np.dot(jacobian, out.grad[i])
+
+            ## previous code using jacobian
+            # grad_self = np.empty_like(out.data)
+            # for i in range(out.data.shape[0]):
+            #     s = out.data[i].reshape(-1, 1)
+            #     jacobian = np.diagflat(s) - np.dot(s, s.T)
+            #     grad_self[i] = np.dot(jacobian, out.grad[i])
+
+
+            # grad shape: same as out.data
+            grad = out.grad
+            s = out.data
+            # sum over the softmax axis
+            dot = np.sum(grad * s, axis=dim, keepdims=True)
+            grad_self = s * (grad - dot)
             grad_self = _handle_broadcasting(grad_self, tensor.data.shape)
             tensor.grad += grad_self
+            
     out._backward = _backward
 
     return out

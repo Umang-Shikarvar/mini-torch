@@ -178,6 +178,37 @@ def test_rtruediv():
     assert_tensor_allclose(a, t_a)
     assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy(), atol=1e-6)
 
+def test_sum_function():
+    # 1D sum
+    a = minitorch.Tensor([1.0, 2.0, 3.0], requires_grad=True)
+    c = minitorch.sum(a)
+    t_a = torch.tensor([1.0, 2.0, 3.0], requires_grad=True)
+    t_c = t_a.sum()
+    assert np.allclose(c.data, t_c.detach().cpu().numpy())
+    c.backward()
+    t_c.backward()
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy())
+
+    # 2D sum, axis=0
+    a2 = minitorch.Tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=True)
+    c2 = minitorch.sum(a2, axis=0)
+    t_a2 = torch.tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=True)
+    t_c2 = t_a2.sum(dim=0)
+    assert np.allclose(c2.data, t_c2.detach().cpu().numpy())
+    c2.backward(np.ones_like(c2.data))
+    t_c2.backward(torch.ones_like(t_c2))
+    assert np.allclose(a2.grad, t_a2.grad.detach().cpu().numpy())
+
+    # 2D sum, axis=1, keepdims=True
+    a3 = minitorch.Tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=True)
+    c3 = minitorch.sum(a3, axis=1, keepdims=True)
+    t_a3 = torch.tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=True)
+    t_c3 = t_a3.sum(dim=1, keepdim=True)
+    assert np.allclose(c3.data, t_c3.detach().cpu().numpy())
+    c3.backward(np.ones_like(c3.data))
+    t_c3.backward(torch.ones_like(t_c3))
+    assert np.allclose(a3.grad, t_a3.grad.detach().cpu().numpy())
+
 def test_exp_function():
     a = Tensor(1.5)
     c = exp(a)
@@ -350,3 +381,32 @@ def test_tensor_grad_dtype():
     # Boolean tensor should not have grad
     d = Tensor([True, False, True], dtype=minitorch.bool)
     assert d.grad is None
+
+# --- INDEXING AND SLICING TESTS ---
+def test_tensor_indexing():
+    a = minitorch.Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    t_a = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    # Single index
+    assert np.allclose(a[0].data, t_a[0].detach().cpu().numpy())
+    # Slice
+    assert np.allclose(a[:, 1].data, t_a[:, 1].detach().cpu().numpy())
+    # 2D slice
+    assert np.allclose(a[0:2, 1:3].data, t_a[0:2, 1:3].detach().cpu().numpy())
+
+def test_tensor_indexing_backward():
+    a = minitorch.Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    t_a = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    out = a[1, 2] * 2.0
+    t_out = t_a[1, 2] * 2.0
+    out.backward()
+    t_out.backward()
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy())
+
+def test_tensor_slicing_backward():
+    a = minitorch.Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    t_a = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    out = a[:, 1:3].sum()
+    t_out = t_a[:, 1:3].sum()
+    out.backward()
+    t_out.backward()
+    assert np.allclose(a.grad, t_a.grad.detach().cpu().numpy())
