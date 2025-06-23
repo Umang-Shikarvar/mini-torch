@@ -68,6 +68,19 @@ class Tensor:
             data_str = np.array2string(self.data, separator=', ')
         grad_str = ", requires_grad=True" if self.requires_grad else ""
         return f"tensor({data_str}{grad_str})"
+
+    def __getitem__(self, idx):
+        # Support slicing/indexing, return a new Tensor with autograd tracking
+        out_data = self.data[idx]
+        out = Tensor(out_data, children=(self,), _op=f'getitem[{idx}]', requires_grad=self.requires_grad)
+        def _backward():
+            if self.requires_grad:
+                grad_self = np.zeros_like(self.data, dtype=self.data.dtype)
+                grad_self[idx] = out.grad
+                grad_self = _handle_broadcasting(grad_self, self.data.shape)
+                self.grad += grad_self
+        out._backward = _backward
+        return out
     
     @property
     def dtype(self):
