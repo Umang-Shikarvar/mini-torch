@@ -1,12 +1,5 @@
-# Import Parameter
-from .parameter import Parameter
-
-# Import all modules
-from .modules.module import Module
-from .modules.linear import Linear
-from .modules.activation import ReLU, Sigmoid, Tanh
-from .modules.sequential import Sequential
+from minitorch.nn.parameter import Parameter
+from minitorch.nn.modules import *
 
 # Import loss functions
-from .loss import MSELoss
-from .loss import BCELoss
+from .loss import MSELoss, BCEloss

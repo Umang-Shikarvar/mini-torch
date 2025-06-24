@@ -1,5 +1,5 @@
 
 from .module import Module
+from .activation import ReLU, Sigmoid, Tanh, LeakyReLU, Softmax
 from .linear import Linear
-from .activation import ReLU, Sigmoid, Tanh
 from .sequential import Sequential
