@@ -14,7 +14,7 @@ class MSELoss:
         return self.forward(input, target)
     
 
-class BCEloss:
+class BCELoss:
     def __init__(self) -> None:
         pass
 

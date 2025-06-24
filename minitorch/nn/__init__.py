@@ -2,4 +2,4 @@ from minitorch.nn.parameter import Parameter
 from minitorch.nn.modules import *
 
 # Import loss functions
-from .loss import MSELoss, BCEloss
+from .loss import MSELoss, BCELoss

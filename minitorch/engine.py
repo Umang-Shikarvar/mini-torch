@@ -118,6 +118,19 @@ class Tensor:
         out._backward = _backward
         return out
     
+    def unsqueeze(self, dim):
+        dim = int(dim)
+        if dim < 0:
+            dim += self.data.ndim + 1
+        out_data = np.expand_dims(self.data, axis=dim)
+        out = Tensor(out_data, children=(self,), _op=f'unsqueeze({dim})', requires_grad=self.requires_grad)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += np.squeeze(out.grad, axis=dim)
+        out._backward = _backward
+        return out
+
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
 
