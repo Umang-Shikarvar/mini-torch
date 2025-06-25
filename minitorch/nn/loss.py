@@ -7,7 +7,7 @@ class MSELoss:
     def forward(self, predictions, targets):
         if predictions.shape != targets.shape:
             raise ValueError("Shape mismatch between predictions and targets.")
-        return ((predictions - targets) ** 2).mean()
+        return ((predictions - targets)**2).mean()
 
     def __call__(self, predictions, targets):
         return self.forward(predictions, targets)
@@ -21,7 +21,7 @@ class BCELoss:
         if predictions.shape != targets.shape:
             raise ValueError("Shape mismatch between predictions and targets.")
         predictions = np.clip(predictions, 1e-12, 1 - 1e-12) # to avoid log(0)
-        return -(targets * np.log(predictions) + (1 - targets) * np.log(1 - predictions)).mean()
+        return -(targets*np.log(predictions) + (1 - targets)*np.log(1 - predictions)).mean()
 
     def __call__(self, predictions, targets):
         return self.forward(predictions, targets)
