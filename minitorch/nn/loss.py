@@ -20,7 +20,7 @@ class BCELoss:
     def forward(self, predictions, targets):
         if predictions.shape != targets.shape:
             raise ValueError("Shape mismatch between predictions and targets.")
-        predictions = np.clip(predictions, 1e-12, 1 - 1e-12)
+        predictions = np.clip(predictions, 1e-12, 1 - 1e-12) # to avoid log(0)
         return -(targets * np.log(predictions) + (1 - targets) * np.log(1 - predictions)).mean()
 
     def __call__(self, predictions, targets):
